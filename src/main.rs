@@ -70,7 +70,7 @@ fn main() {
 
     match choise.trim() {
         "audio" => {
-            println!("Enter audio format(mp3, opus, etc):");
+            println!("Enter audio format(mp3, opus, m4a, wav, aac, alac, flac, vorbis):");
             io::stdin().read_line(&mut audio_format).unwrap();
 
             download_audio(&url, &audio_format, &path);
