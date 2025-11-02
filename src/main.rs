@@ -9,20 +9,29 @@ fn run_command(args: Vec<&str>) {
         .expect(format!("Failed to execute command{:#?}", &args).as_str());
 }
 
-fn download_video(url: &str, format: Option<&str>, path: &str) {
+fn download(url: &str, path: &str, output: &str, format: &str) {
     let mut args = vec![
         "yt-dlp",
         "-o",
         "%(title)s.%(ext)s",
-        &url,
+        url,
     ];
 
-    match format {
-        Some(value) => {
-            args.push("-f");
-            args.push(value);
+    match output {
+        "audio" => {
+            args.push("-x");
+            if !format.is_empty() {
+                args.push("--audio-format");
+                args.push(format);
+            }
         }
-        None => {}
+        "video" => {
+            if !format.is_empty() {
+                args.push("-f");
+                args.push(format);
+            }
+        }
+        _ => panic!("Wrong media type")
     }
 
     if !path.is_empty() {
@@ -33,127 +42,21 @@ fn download_video(url: &str, format: Option<&str>, path: &str) {
     run_command(args);
 }
 
-fn download_audio(url: &str, format: &str, path: &str) {
-    let mut args = vec![
-        "yt-dlp",
-        "-x",
-        "--audio-format",
-        format,
-        "-o",
-        "%(title)s.%(ext)s",
-        &url,
-    ];
-
-    if !path.is_empty() {
-        args.push("-P");
-        args.push(path);
-    }
-
-    run_command(args);
-}
-
-fn args_in_file(file: &File) -> Vec<String> {
+fn args_in_file(file: &File) -> Vec<Option<String>> {
     let reader = BufReader::new(file);
-    let mut input: Vec<String> = Vec::new();
+    let mut args: Vec<Option<String>> = vec![None, None, None];
 
     for line in reader.lines() {
         let line = line.unwrap();
-        input.push(line);
+
+        if !line.is_empty() {
+            args.push(Some(line));
+        } else {
+            args.push(None);
+        }
     }
 
-    println!("{:?}", input);
-
-    input
-}
-
-fn is_file_empty(file: &File) -> bool {
-    let metadata = file.metadata().expect("File should have metadata");
-    metadata.len() == 0
-}
-
-fn manual_input(url: &str) {
-    let mut path = String::new();
-    println!("Enter path to install video(you can leave this field empty):");
-    io::stdin().read_line(&mut path).unwrap();
-
-    let mut output = String::new();
-    println!("Output file(video, audio):");
-    io::stdin().read_line(&mut output).unwrap();
-
-    match output.trim() {
-        "audio" => {
-            let mut audio_format = String::new();
-            println!("Enter audio format(mp3, opus, m4a, wav, aac, alac, flac, vorbis):");
-            io::stdin().read_line(&mut audio_format).unwrap();
-
-            download_audio(&url, &audio_format, &path);
-        } 
-        "video" => {
-            let mut choise_format = String::new();
-            println!("Wanna see all formats for video or keep it default?(default or custom)");
-            io::stdin().read_line(&mut choise_format).unwrap();
-
-            match choise_format.trim() {
-                "default" => {
-                    download_video(&url, None, &path);
-                }
-                "custom" => {
-                    run_command(vec![
-                        "yt-dlp",
-                        "-F",
-                        &url,
-                    ]);
-
-                    let mut video_format = String::new();
-                    println!("Enter video format code:");
-                    io::stdin().read_line(&mut video_format).unwrap();
-
-                    download_video(&url, Some(&video_format), &path);
-                }
-                _ => panic!("Wrong answer!!!")
-            }
-        }
-        _ => {}
-    }
-}
-
-fn file_input(url: &str, file: &File) {
-    let file_vec = args_in_file(&file);
-    let path = &file_vec[0];
-    let output = &file_vec[1];
-    
-    match output.trim() {
-        "audio" => {
-            let audio_format = &file_vec[2];
-            download_audio(&url, &audio_format, &path);
-        }
-        "video" => {
-            let video_format = file_vec.get(2);
-
-            match video_format {
-                Some(value) => {
-                    if value == "default" {
-                        download_video(url, None, path);
-                    } else {
-                        download_video(url, Some(value), &path);
-                    }
-                }
-                None => {
-                    run_command(vec![
-                        "yt-dlp",
-                        "-F",
-                        &url,
-                    ]);
-
-                    let mut format = String::new();
-                    io::stdin().read_line(&mut format).unwrap();
-
-                    download_video(url, Some(&format), &path);
-                }
-            }
-        }
-        _ => {}
-    }
+    args
 }
 
 fn main() {
@@ -162,9 +65,75 @@ fn main() {
     io::stdin().read_line(&mut url).unwrap();
 
     let file = File::open("args.txt").expect("Could not open file");
+    let file_vec = args_in_file(&file);
 
-    match is_file_empty(&file) {
-        true => manual_input(&url),
-        false => file_input(&url, &file),
+    let mut vec: Vec<String> = Vec::new();
+
+    // Path
+    match file_vec[0].clone() {
+        Some(value) => vec.push(value),
+        None => {
+            let mut buf = String::new();
+            println!("Enter your path(you can leave this field empty)");
+            io::stdin().read_line(&mut buf).unwrap();
+            vec.push(buf.trim().to_string());
+        }   
     }
+
+    // Output
+    match file_vec[1].clone() {
+        Some(value) => vec.push(value),
+        None => {
+            let mut buf = String::new();
+            println!("Enter your media type(you can leave this field empty)");
+            io::stdin().read_line(&mut buf).unwrap();
+            vec.push(buf.trim().to_string());
+        }
+    }
+
+    // Format
+    match file_vec[2].clone() {
+        Some(value) => vec.push(value),
+        None => {
+            match vec[1].as_str() {
+                "audio" => {
+                    let mut buf = String::new();
+                    println!("Enter format(mp3, opus, m4a, wav, aac, alac, flac, vorbis) or leave empty");
+                    io::stdin().read_line(&mut buf).unwrap();
+
+                    vec.push(buf.trim().to_string());
+                }
+                "video" => {
+                    let mut buf = String::new();
+                    println!("Wanna see all formats for video?(yes or no)");
+                    io::stdin().read_line(&mut buf).unwrap();
+
+                    if buf.trim() == "yes" {
+                        run_command(vec![
+                            "yt-dlp",
+                            "-F",
+                            &url,
+                        ]);
+                        
+                        buf = String::new();
+                        println!("Enter your format code or leave empty");
+                        io::stdin().read_line(&mut buf).unwrap();
+
+                        vec.push(buf.trim().to_string());
+                    } else if buf.trim() == "no" {
+                        buf = String::new();
+                        println!("Enter your format code or leave empty");
+                        io::stdin().read_line(&mut buf).unwrap();
+
+                        vec.push(buf.trim().to_string());
+                    }
+                }
+                _ => panic!("Wrong!!!")
+            }
+        }
+    }
+
+    println!("{:?}", vec);
+
+    download(&url, &vec[0], &vec[1], &vec[2]);
 }
