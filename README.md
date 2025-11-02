@@ -11,7 +11,7 @@ audio - Output file
 opus - Format
 ```
 
-## For video(exampe):
+## For video(example):
 ```
 out - Path
 video - Output file
