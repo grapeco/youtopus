@@ -6,14 +6,14 @@
 
 ## For audio(example):
 ```
-out - Path
+out - Path(for default path keep this field empty)
 audio - Output file
 opus - Format
 ```
 
 ## For video(example):
 ```
-out - Path
+out - Path(for default path keep this field empty)
 video - Output file
 399+251(custom format, you can set this line to "default" or keep empty)
 ```
