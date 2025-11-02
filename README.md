@@ -6,8 +6,8 @@
 
 ## Structure of file
 **first line** = Path(optional)<br>
-**second line** = Output<br>
-**third line** = Format<br>
+**second line** = Output media type<br>
+**third line** = Format(optional)<br>
 
 ## For audio(example):
 ```
