@@ -46,13 +46,13 @@ fn args_in_file(file: &File) -> Vec<Option<String>> {
     let reader = BufReader::new(file);
     let mut args: Vec<Option<String>> = vec![None, None, None];
 
-    for line in reader.lines() {
+    for (i, line) in reader.lines().enumerate() {
         let line = line.unwrap();
 
         if !line.is_empty() {
-            args.push(Some(line));
+            args[i] = Some(line);
         } else {
-            args.push(None);
+            args[i] = None;
         }
     }
 
