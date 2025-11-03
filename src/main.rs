@@ -9,7 +9,7 @@ fn run_command(args: Vec<&str>) {
         .expect(format!("Failed to execute command{:#?}", &args).as_str());
 }
 
-fn download(url: &str, path: &str, output: &str, format: &str) {
+fn download(url: &str, path: &str, media_type: &str, format: &str) {
     let mut args = vec![
         "yt-dlp",
         "-o",
@@ -17,18 +17,24 @@ fn download(url: &str, path: &str, output: &str, format: &str) {
         url,
     ];
 
-    match output {
+    match media_type {
         "audio" => {
             args.push("-x");
-            if !format.is_empty() {
-                args.push("--audio-format");
-                args.push(format);
+            match format {
+                value if value != "" => {
+                    args.push("--audio-format");
+                    args.push(value);
+                }
+                _ => {}
             }
         }
         "video" => {
-            if !format.is_empty() {
-                args.push("-f");
-                args.push(format);
+            match format {
+                value if value != "" => {
+                    args.push("-f");
+                    args.push(value);
+                }
+                _ => {}
             }
         }
         _ => panic!("Wrong media type")
@@ -67,73 +73,29 @@ fn main() {
     let file = File::open("args.txt").expect("Could not open file");
     let file_vec = args_in_file(&file);
 
-    let mut vec: Vec<String> = Vec::new();
+    let mut args: Vec<String> = Vec::new();
+
+    println!("{:?}", file_vec);
 
     // Path
     match file_vec[0].clone() {
-        Some(value) => vec.push(value),
-        None => {
-            let mut buf = String::new();
-            println!("Enter your path(you can leave this field empty)");
-            io::stdin().read_line(&mut buf).unwrap();
-            vec.push(buf.trim().to_string());
-        }   
+        Some(value) => args.push(value),
+        None => args.push("".to_string()),  
     }
 
-    // Output
+    // Media type
     match file_vec[1].clone() {
-        Some(value) => vec.push(value),
-        None => {
-            let mut buf = String::new();
-            println!("Enter your media type(you can leave this field empty)");
-            io::stdin().read_line(&mut buf).unwrap();
-            vec.push(buf.trim().to_string());
-        }
+        Some(value) => args.push(value),
+        None => panic!("Fill the file!!!")
     }
 
     // Format
     match file_vec[2].clone() {
-        Some(value) => vec.push(value),
-        None => {
-            match vec[1].as_str() {
-                "audio" => {
-                    let mut buf = String::new();
-                    println!("Enter format(mp3, opus, m4a, wav, aac, alac, flac, vorbis) or leave empty");
-                    io::stdin().read_line(&mut buf).unwrap();
-
-                    vec.push(buf.trim().to_string());
-                }
-                "video" => {
-                    let mut buf = String::new();
-                    println!("Wanna see all formats for video?(yes or no)");
-                    io::stdin().read_line(&mut buf).unwrap();
-
-                    if buf.trim() == "yes" {
-                        run_command(vec![
-                            "yt-dlp",
-                            "-F",
-                            &url,
-                        ]);
-                        
-                        buf = String::new();
-                        println!("Enter your format code or leave empty");
-                        io::stdin().read_line(&mut buf).unwrap();
-
-                        vec.push(buf.trim().to_string());
-                    } else if buf.trim() == "no" {
-                        buf = String::new();
-                        println!("Enter your format code or leave empty");
-                        io::stdin().read_line(&mut buf).unwrap();
-
-                        vec.push(buf.trim().to_string());
-                    }
-                }
-                _ => panic!("Wrong!!!")
-            }
-        }
+        Some(value) => args.push(value),
+        None => args.push("".to_string())
     }
 
-    println!("{:?}", vec);
+    println!("{:?}", args);
 
-    download(&url, &vec[0], &vec[1], &vec[2]);
+    download(&url, &args[0], &args[1], &args[2]);
 }

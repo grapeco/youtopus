@@ -2,7 +2,8 @@
 ## 1. Rust
 ## 2. yt-dlp
 
-# How to use args.txt
+# How to use this programm
+## You need to fill args.txt file
 
 ## Structure of file
 **first line** = Path(optional)<br>
@@ -13,14 +14,14 @@
 ```
 out
 audio
-opus(value or "")
+opus
 ```
 
 ## For video(example):
 ```
 out
 video
-399+251(value or "")
+399+251
 ```
 
-## You don't have to use this file, but it's more efficient then manualy type in cli. You always have a choise
+## This programm working only with args.txt. You don't have choise
