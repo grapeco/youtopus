@@ -20,21 +20,15 @@ fn download(url: &str, path: &str, media_type: &str, format: &str) {
     match media_type {
         "audio" => {
             args.push("-x");
-            match format {
-                value if value != "" => {
-                    args.push("--audio-format");
-                    args.push(value);
-                }
-                _ => {}
+            if !format.is_empty() {
+                args.push("--audio-format");
+                args.push(format);
             }
         }
         "video" => {
-            match format {
-                value if value != "" => {
-                    args.push("-f");
-                    args.push(value);
-                }
-                _ => {}
+            if !format.is_empty() {
+                args.push("-f");
+                args.push(format);
             }
         }
         _ => panic!("Wrong media type")
@@ -91,7 +85,23 @@ fn main() {
 
     // Format
     match file_vec[2].clone() {
-        Some(value) => args.push(value),
+        Some(value) => {
+            if args[1] == "video" && value == "custom" {
+                run_command(vec![
+                    "yt-dlp",
+                    "-F",
+                    &url,
+                ]);
+
+                let mut buf = String::new();
+                println!("Enter your format or leave empty");
+                io::stdin().read_line(&mut buf).unwrap();
+
+                args.push(buf.trim().to_string());
+            } else {
+                args.push(value);
+            }
+        }
         None => args.push("".to_string())
     }
 

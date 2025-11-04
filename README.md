@@ -21,7 +21,7 @@ opus
 ```
 out
 video
-399+251
+399+251("" for default and "custom" for choosing format)
 ```
 
 ## This programm working only with args.txt. You don't have choise
