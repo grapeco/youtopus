@@ -1,6 +1,6 @@
-# Requirements:
-## 1. Rust
-## 2. yt-dlp
+## Requirements:
+Rust<br>
+yt-dlp<br>
 
 # How to use this programm
 ## You need to fill args.txt file
