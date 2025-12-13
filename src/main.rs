@@ -12,6 +12,7 @@ fn run_command(args: Vec<&str>) {
 fn download(url: &str, path: &str, media_type: &str, format: &str) {
     let mut args = vec![
         "yt-dlp",
+        "--check-formats",
         "-o",
         "%(title)s.%(ext)s",
         url,

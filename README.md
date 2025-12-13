@@ -13,7 +13,7 @@ yt-dlp<br>
 ## For audio(example):
 ```
 out
-audio(aac, alac,flac, m4a, mp3, opus, vorbis, wav)
+audio(alac, flac, mp3, opus, vorbis, wav)
 opus
 ```
 
