@@ -2,6 +2,9 @@
 Rust<br>
 yt-dlp<br>
 
+# NOTE!!!
+## don't run this programm in nix shell env
+
 # How to use this programm
 ## You need to fill args.txt file
 
@@ -13,7 +16,7 @@ yt-dlp<br>
 ## For audio(example):
 ```
 out
-audio(alac, flac, mp3, opus, vorbis, wav)
+audio(aac, alac, flac, mp3, opus, vorbis, wav)
 opus
 ```
 
