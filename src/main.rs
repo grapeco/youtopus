@@ -1,5 +1,5 @@
 use std::{
-    fs::File, io::{self, BufRead, BufReader}, process::Command
+    env, fs::File, io::{self, BufRead, BufReader}, process::Command
 };
 
 fn run_command(args: Vec<&str>) {
@@ -16,6 +16,13 @@ fn download(url: &str, path: &str, media_type: &str, format: &str) {
         "%(title)s.%(ext)s",
         url,
     ];
+
+    let cli_args: Vec<String> = env::args().collect();
+    for i in 1..cli_args.len() {
+        args.push(&cli_args[i]);
+    }
+
+    println!("{:?}", args);
 
     match media_type {
         "audio" => {
@@ -68,8 +75,6 @@ fn main() {
     let file_vec = args_in_file(&file);
 
     let mut args: Vec<String> = Vec::new();
-
-    println!("{:?}", file_vec);
 
     // Path
     match file_vec[0].clone() {
