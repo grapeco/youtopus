@@ -1,5 +1,4 @@
 target/
 .direnv/
 out/
-
-Cargo.lock
+args.txt
