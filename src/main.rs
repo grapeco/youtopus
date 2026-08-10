@@ -18,9 +18,10 @@ fn download(url: &str, path: &str, media_type: &str, format: &str) {
     ];
 
     let cli_args: Vec<String> = env::args().collect();
-    for i in 1..cli_args.len() {
-        args.push(&cli_args[i]);
+    for item in cli_args.iter().skip(1) {
+        args.push(item);
     }
+    *args.last_mut().unwrap() = args.last_mut().unwrap().trim_end();
 
     println!("{:?}", args);
 
